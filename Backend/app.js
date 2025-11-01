@@ -12,6 +12,9 @@ const app=express();
 const cors=require('cors');
 const UserRouter=require('./Routes/User');
 
+// Trust proxy for Railway/production
+app.set('trust proxy', 1);
+
 //This is used to make connection between frontend and backend sometimes what happens frontend or browser blocks the request from any type
 app.use(cors({
   origin: process.env.CORS_ORIGIN || "http://localhost:5173",
@@ -74,6 +77,15 @@ app.use(session({
 // REMOVED: Don't use upload globally - only use it on specific routes
 // app.use(upload);
 
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 app.use('/user',UserRouter);
 app.use('/host',HostRouter);
